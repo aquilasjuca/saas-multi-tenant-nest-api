@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Company } from '../company/entities/company.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -24,7 +25,13 @@ export class UserService {
       throw new NotFoundException('Company not found');
     }
 
-    const user = this.userRepository.create(dto);
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const user = this.userRepository.create({
+      ...dto,
+      password: hashedPassword,
+    });
+
     return this.userRepository.save(user);
   }
 
