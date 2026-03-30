@@ -40,4 +40,10 @@ export class UserService {
       relations: ['company'],
     });
   }
+
+  async findByEmail(email: string) {
+    return this.userRepository.findOne({
+      where: { email },
+    });
+  }
 }
