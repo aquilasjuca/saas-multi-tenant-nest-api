@@ -3,6 +3,9 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Req } from '@nestjs/common';
+import { Request } from 'express';
+import { JwtPayload } from '../auth/types/jws-payload.type';
 
 @Controller('users')
 export class UserController {
@@ -13,9 +16,9 @@ export class UserController {
     return this.userService.create(dto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  @UseGuards(JwtAuthGuard)
+  findAll(@Req() req: Request & { user: JwtPayload }) {
+    return this.userService.findAll(req.user);
   }
 }

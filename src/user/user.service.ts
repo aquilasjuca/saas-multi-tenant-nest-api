@@ -5,6 +5,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Company } from '../company/entities/company.entity';
 import * as bcrypt from 'bcrypt';
+import { JwtPayload } from '../auth/types/jws-payload.type';
 
 @Injectable()
 export class UserService {
@@ -35,9 +36,11 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  async findAll() {
+  async findAll(user: JwtPayload) {
     return this.userRepository.find({
-      relations: ['company'],
+      where: {
+        companyId: user.companyId,
+      },
     });
   }
 
