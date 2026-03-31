@@ -13,6 +13,7 @@ import { JwtPayload } from '../auth/types/jws-payload.type';
 import { GetTasksDto } from './dto/get-tasks.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { FindOptionsWhere } from 'typeorm';
+import { TaskAttachment } from '../task-attachment/entities/task-attachment.entity';
 
 @Injectable()
 export class TaskService {
@@ -22,6 +23,9 @@ export class TaskService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    @InjectRepository(TaskAttachment)
+    private readonly attachmentRepository: Repository<TaskAttachment>,
   ) {}
 
   async create(dto: CreateTaskDto, user: JwtPayload) {
@@ -112,11 +116,28 @@ export class TaskService {
       throw new ForbiddenException('You cannot upload to this task');
     }
 
-    return {
-      message: 'File uploaded successfully',
+    const attachment = this.attachmentRepository.create({
       filename: file.filename,
       originalName: file.originalname,
+      taskId: task.id,
+    });
+
+    await this.attachmentRepository.save(attachment);
+
+    return {
+      message: 'File uploaded successfully',
+      attachment,
     };
+  }
+
+  async getAttachments(taskId: string, user: JwtPayload) {
+    const task = await this.findOne(taskId, user);
+
+    return this.attachmentRepository.find({
+      where: {
+        taskId: task.id,
+      },
+    });
   }
 
   async remove(id: string, user: JwtPayload) {

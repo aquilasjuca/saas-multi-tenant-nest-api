@@ -82,6 +82,15 @@ export class TaskController {
     return this.taskService.uploadFile(id, file, req.user);
   }
 
+  @Get(':id/attachments')
+  @UseGuards(JwtAuthGuard)
+  getAttachments(
+    @Param('id') id: string,
+    @Req() req: Request & { user: JwtPayload },
+  ) {
+    return this.taskService.getAttachments(id, req.user);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Delete(':id')
