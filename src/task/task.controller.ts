@@ -17,6 +17,8 @@ import { Request } from 'express';
 import { JwtPayload } from '../auth/types/jws-payload.type';
 import { GetTasksDto } from './dto/get-tasks.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('tasks')
 @UseGuards(JwtAuthGuard)
@@ -53,6 +55,8 @@ export class TaskController {
     return this.taskService.update(id, dto, req.user);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req: Request & { user: JwtPayload }) {
     return this.taskService.remove(id, req.user);

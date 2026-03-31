@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Company } from '../../company/entities/company.entity';
+import { Role } from '../enums/role.enum';
 
 @Entity('users')
 export class User {
@@ -24,6 +25,13 @@ export class User {
 
   @ManyToOne(() => Company)
   company: Company;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+  })
+  role: Role;
 
   @Column()
   companyId: string;
