@@ -105,6 +105,20 @@ export class TaskService {
     return this.taskRepository.save(task);
   }
 
+  async uploadFile(id: string, file: Express.Multer.File, user: JwtPayload) {
+    const task = await this.findOne(id, user);
+
+    if (task.userId !== user.sub) {
+      throw new ForbiddenException('You cannot upload to this task');
+    }
+
+    return {
+      message: 'File uploaded successfully',
+      filename: file.filename,
+      originalName: file.originalname,
+    };
+  }
+
   async remove(id: string, user: JwtPayload) {
     const task = await this.taskRepository.findOne({
       where: { id },

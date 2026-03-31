@@ -9,6 +9,8 @@ import {
   Param,
   Patch,
   Delete,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -19,6 +21,9 @@ import { GetTasksDto } from './dto/get-tasks.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('tasks')
 @UseGuards(JwtAuthGuard)
@@ -53,6 +58,28 @@ export class TaskController {
     @Req() req: Request & { user: JwtPayload },
   ) {
     return this.taskService.update(id, dto, req.user);
+  }
+
+  @Post(':id/upload')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
+
+          callback(null, uniqueName + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  uploadFile(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request & { user: JwtPayload },
+  ) {
+    return this.taskService.uploadFile(id, file, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
