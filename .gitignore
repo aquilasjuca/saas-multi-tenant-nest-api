@@ -47,3 +47,7 @@ docker-compose.override.yml
 
 # lockfiles
 package-lock.json
+
+# Uploads
+/uploads/*
+!/uploads/.gitkeep
